@@ -1,12 +1,12 @@
 Outputs:
 
-Outputs section declares output values that we can
+1. Outputs section declares output values that we can
 
 	* Import into other stacks ( to create cross-stack references )
 	* When using Nested Stacks, we can see how outputs of a nested stack are used
 	  in Root Stack.
 
-We Can declare maximun of 60 outputs in a cfn template
+2. We Can declare maximun of 60 outputs in a cfn template
 
 Syntax:
 
