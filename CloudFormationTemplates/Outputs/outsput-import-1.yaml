@@ -1,0 +1,48 @@
+# Create a new stack by referencing the Security Group and Availability Zone
+# export value from previous stack. Use Fn::ImportValue intrinsic function
+# to import those exports.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Output Practice
+
+Parameters:
+  MyKeyName:
+    Description: Seletc the Key Pair Name
+    Type: AWS::EC2::KeyPair::KeyName
+  MyEnvName:
+    Description: Select the Environment
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    ConstraintDescription: must be development or production
+
+Mappings:
+  MyRegionMap:
+    us-east-2:
+      HVM64: ami-02f706d959cedf892
+    us-west-1:
+      HVM64: ami-0fcdcdb074d2bac5f
+  MyInsTypeMap:
+    dev:
+      instancetype: t2.micro
+    prod:
+      instancetype: t2.micro
+
+Resources:
+  MyVMInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - MyRegionMap
+        - !Ref 'AWS::Region'
+        - HVM64
+      InstanceType: !FindInMap
+        - MyInsTypeMap
+        - !Ref MyEnvName
+        - instancetype
+      KeyName: !Ref MyKeyName
+      SecurityGroups:
+        - !ImportValue MySecurityGroup
+      AvailabilityZone: !ImportValue stack1-InstanceAz

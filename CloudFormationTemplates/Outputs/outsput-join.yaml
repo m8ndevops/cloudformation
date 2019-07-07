@@ -1,0 +1,77 @@
+# Demonstrate intrinsic Function Fn::Join
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Output Practice
+
+Parameters:
+  MyKeyName:
+    Description: Seletc the Key Pair Name
+    Type: AWS::EC2::KeyPair::KeyName
+  MyEnvName:
+    Description: Select the Environment
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    ConstraintDescription: must be development or production
+
+Mappings:
+  MyRegionMap:
+    us-east-2:
+      HVM64: ami-02f706d959cedf892
+    us-west-1:
+      HVM64: ami-0fcdcdb074d2bac5f
+  MyInsTypeMap:
+    dev:
+      instancetype: t2.micro
+    prod:
+      instancetype: t2.micro
+
+Conditions:
+  CreateSecurityGroup: !Equals [!Ref MyEnvName, dev]
+
+Resources:
+  MyVMInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - MyRegionMap
+        - !Ref 'AWS::Region'
+        - HVM64
+      InstanceType: !FindInMap
+        - MyInsTypeMap
+        - !Ref MyEnvName
+        - instancetype
+      KeyName: !Ref MyKeyName
+      SecurityGroups: !If [CreateSecurityGroup,[!Ref MySecurityGroup],!Ref 'AWS::NoValue']
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: CreateSecurityGroup
+    Properties:
+      GroupDescription: SSH SecurityGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  MyInstanceId:
+    Description: Ref Instance Id 
+    Value: !Ref MyVMInstance
+  MyDns:
+    Description: GetAtt DNS 
+    Value: !GetAtt MyVMInstance.PublicDnsName
+  MyAZ:
+    Description: GetAtt AZ
+    Value: !GetAtt MyVMInstance.AvailabilityZone
+    Export:
+      Name: !Sub "${AWS::StackName}-InstanceAz"
+  MySG:
+    Description: Exporting SecurityGroup
+    Value: !Ref MySecurityGroup
+    Condition: CreateSecurityGroup
+    Export:
+      Name: !Join [":",[!Ref AWS::StackName],MySecurityGroup]

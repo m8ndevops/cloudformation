@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Basic EC2 Instance
+
+Parameters:
+  MyKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description:  Select the KeyPair Name
+  MyEnvironment:
+    Description: Select the Environment
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+Mappings:
+  MyRegionMap:
+    us-east-2:
+      HVM64: ami-02f706d959cedf892
+    us-west-1:
+      HVM64: ami-0fcdcdb074d2bac5f
+  MyEnvironmentMap:
+    dev:
+      instanceType: t2.micro
+    prod:
+      instanceType: t2.small
+
+Resources:
+  DevInstances:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - MyRegionMap
+        - !Ref 'AWS::Region'  # top level key 
+        - HVM64               # second level key
+      InstanceType: !FindInMap
+        - MyEnvironmentMap
+        - !Ref MyEnvironment
+        - instanceType
+      KeyName: !Ref MyKeyName
