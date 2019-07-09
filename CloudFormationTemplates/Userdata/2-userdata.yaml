@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  EnvironmentName:
+    Description: Select EnvironmentName
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    ConstraintDescription: Must be Selected
+  InstanceType:
+    Description:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.nano
+      - t2.small
+  KeyName:
+    Description: Select KeyName
+    Type: AWS::EC2::KeyPair::KeyName
+  AvailabilityZone:
+    Description: Select AvailabilityZone
+    Type: String
+    Default: us-east-2a
+    AllowedValues:
+      - us-east-2a
+      - us-east-2b
+      - us-east-2c
+
+Conditions:
+  CreateEIPForProd: !Equals [!Ref EnvironmentName, prod]
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "EC2 Instance"
+        Parameters:
+          - InstanceType
+          - KeyName
+          - AvailabilityZone
+      - Label:
+          default: "EnvironmentName"
+        Parameters:
+          - EnvironmentName
+    ParameterLabels:
+      EnvironmentName:
+        default: "which EnvironmentName to Select"
+      KeyName:
+        default: "Select the KeyName"
+
+Resources:
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: MySecurityGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+
+  MyVMInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-02f706d959cedf892
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      AvailabilityZone: !Ref AvailabilityZone
+      SecurityGroups:
+        - !Ref MySecurityGroup
+      UserData:  
+       Fn::Base64: |
+        #!/bin/bash
+        sudo yum update
+        sudo yum -y erase java-1.7.0-openjdk.x86_64
+        sudo yum -y install java-1.8.0-openjdk.x86_64
+        sudo yum -y install java-1.7.0-openjdk-devel
+        sudo yum -y install tomcat8
+        service tomcat8 start
+        mkdir /usr/share/tomcat8/webapps/ROOT
+        touch /usr/share/tomcat8/webapps/ROOT/index.html
+        echo "Cloud Formation Tomcat8" > /usr/share/tomcat8/webapps/ROOT/index.html
+  MyProdEIP:
+    Type: AWS::EC2::EIP 
+    Condition: CreateEIPForProd
+    Properties:
+      InstanceId: !Ref MyVMInstance
