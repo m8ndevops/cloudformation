@@ -1,14 +1,14 @@
 UserData
 
-Use UserData in CloudFormation template for EC2
+	Use UserData in CloudFormation template for EC2
 
-Use a intrinsic Function Fn::Base64 with UserData in CFN templates.
-This function returns the Base64 represention of input String.
-It Passes encoded data to EC2 instance
+	Use a intrinsic Function Fn::Base64 with UserData in CFN templates.
+	This function returns the Base64 represention of input String.
+	It Passes encoded data to EC2 instance
 
-YAML Pipe (|): Any indented text that follows should be interpreted
-as a multi-line scalar value which means value should be interpreted
-literally in such a way that preserves newlines.
+	YAML Pipe (|): Any indented text that follows should be interpreted
+	as a multi-line scalar value which means value should be interpreted
+	literally in such a way that preserves newlines.
 
 UserData Cons:
 
