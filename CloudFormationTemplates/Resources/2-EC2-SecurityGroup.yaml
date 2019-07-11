@@ -1,0 +1,24 @@
+# Add Secound Resource - New Security Group and Intrinsic Function Ref
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Basic EC2 Instance
+
+Resources:
+  DevInstances:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-02f706d959cedf892
+      InstanceType: t2.micro
+      KeyName: cnf-key-1
+      SecurityGroups:
+        - default
+        - !Ref SSHSecurityGroup
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH SecurityGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
