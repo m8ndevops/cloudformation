@@ -1,3 +1,6 @@
+# Create a parameter type of AWS for KeyName
+# property of EC2 instance
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Basic EC2 Instance
 

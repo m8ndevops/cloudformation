@@ -1,3 +1,7 @@
+# Create a Parameter type String for Availability Zone
+# property of EC2 instance.
+
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Basic EC2 Instance
 
@@ -5,7 +9,6 @@ Parameters:
   MyKeyName:
     Description: Select the Key Name 
     Type: AWS::EC2::KeyPair::KeyName
-    Default: cnf-key-1
   MyAvailabilityZone:
     Description: Select the AvailabilityZone
     Type: String 
@@ -14,21 +17,13 @@ Parameters:
       - us-east-2a
       - us-east-2b
       - us-east-2c
-  MyInstanceType:
-    Description: Select Instance Type
-    Type: String
-    Default: t2.micro
-    AllowedValues:
-      - t2.micro
-      - t2.nano
-      - t2.small
 
 Resources:
   DevInstances:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-02f706d959cedf892
-      InstanceType: !Ref MyInstanceType
+      InstanceType: t2.micro
       KeyName: !Ref MyKeyName
       SecurityGroups:
         - default

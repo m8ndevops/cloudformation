@@ -1,3 +1,10 @@
+# Create a parameter type of SSM for InstanceType property
+# of EC2 instance
+
+# PreRequisite:
+#      * Create a SSM Parameter in parameter Store
+
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Basic EC2 Instance
 
