@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Root Stack
+
+Parameters:
+  MyKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+
+  VpcBlock:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: VPC Cidr Range
+
+  Subnet01Block:
+    Type: String
+    Default: 10.0.1.0/24
+    Description: Cidr Block for subnet within VPC
+
+Resources:
+
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cfn-root-stack-bucket.s3.us-east-2.amazonaws.com/nestedstack/1-1-NestedStack-VPC.yaml
+      Parameters:
+        VpcBlock: !Ref VpcBlock
+        Subnet01Block: !Ref Subnet01Block
+
+  MyVMInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-02f706d959cedf892
+      InstanceType:  t2.micro
+      KeyName: !Ref MyKeyName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId: !GetAtt VPCStack.Outputs.Subnet01Id 
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          sudo yum update
+          sudo yum -y erase java-1.7.0-openjdk.x86_64
+          sudo yum -y install java-1.8.0-openjdk.x86_64
+          sudo yum -y install java-1.8.0-openjdk-devel
+          sudo yum -y install tomcat8
+          service tomcat8 start
+          mkdir /usr/share/tomcat8/webapps/ROOT/
+          touch /usr/share/tomcat8/webapps/ROOT/index.html
+          echo "Cloud CFN tomcat8" > /usr/share/tomcat8/webapps/ROOT/index.html
+
+Outputs:
+  AppURL:
+    Description: AppURL to access
+    Value: !Sub "http://${MyVMInstance.PublicDnsName}:8080/index.html"
